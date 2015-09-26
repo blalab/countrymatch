@@ -551,11 +551,13 @@ Should we avoid the extra step of placing the keys in a csv file and just run it
 
 We will use key_x.csv as the needles and key_y.csv as the haystack.
 
+####Simple comparison
+
 The first version of our comparison program will check if both keys are exactly the same with a simple “==” operation.
 
 ```
 
-# keycomparison.py
+# keycomparison_simple.py
 
 import csv
 
@@ -594,10 +596,128 @@ with open(needles, 'rb') as f:
                
 ```
 
-Notice this program performs as many as m*n operations where m=864 and n=64272. However it finishes in about 3 minutes which is not that bad. 
+You'll find the output in the file called results_simple.csv and noresults_simple.csv . The execution time of this program was 9+ hours running from a 2.4 GHz 4GB Ram OsX laptop.
 
 The problem is that it only finds 565 matches out of 865 cities. That is about 65% effective. In a future update I'll go through different algorithms to improve that.
 
+####"Edit Distance" comparison
+
+The simple comparison is equivalent to Edit Distance = 0 . Now we are going to explore Edit Distance > 0
+
+```
+# keycomparison.py
+
+import csv
+from editdistance import editdistance
+
+threshold = 4
+
+d = editdistance()
+candidates = []
+
+needles = 'key_x.csv'
+haystack = 'key_y.csv'
+map = 'results.csv'
+nomap = 'noresults.csv'
+
+
+def csv_writer(rows,path,mode):
+    with open(path, mode) as csv_file:
+        print('Writing '+str(len(rows))+' rows into '+path)
+        for l in rows:
+            writer = csv.writer(csv_file, delimiter=',',quoting=csv.QUOTE_NONNUMERIC)
+            writer.writerow(l)
+
+# Reset existing map
+csv_writer([],map,'w')
+csv_writer([],nomap,'w')
+
+with open(needles, 'rb') as f:
+    reader_x = csv.reader(f)
+    for r in reader_x:
+        id_x = r[0]
+        country_x = r[1]
+        province_x = r[2]
+        city_x = r[3]
+        key_x = country_x+' '+province_x+' '+city_x
+        print('Matching:'+ key_x)
+
+        with open(haystack, 'rb') as m:
+            reader_y = csv.reader(m)
+            candidates = [] 
+            distances = []
+
+            for q in reader_y:
+                id_y = q[0]
+                country_y = q[1]
+                province_y = q[2]
+                city_y = q[3]
+                key_y = country_y+' '+province_y+' '+city_y 
+
+                if key_x.lower() == key_y.lower():
+                    # There is an exact match. No need to calculate edit distance
+
+                    print('Match for: %s, %s,%s. %s maps to %d',
+                          (country_x,province_x,city_x,id_x,id_y))
+
+                    distances.append(0)
+                    break
+                    
+                else:
+
+                    edistance = d.ed(key_x.lower(),key_y.lower())
+                    distances.append(edistance)
+
+                    if edistance <= threshold:
+                        line = [edistance,id_x,key_x,id_y,key_y]
+                        candidates.append(line)
+                        print(line)
+
+            st=(' Min:'+str(min(distances))+
+                  ' Max:'+str(max(distances))+
+                  ' Len:'+str(len(distances))+
+                  ' Avg:'+str(sum(distances)/len(distances)))
+
+            print(st)
+                
+            if len(candidates)!=0:
+                csv_writer(candidates,map,'a')
+            else:
+                print('No candidates found')
+                line = [id_x,country_x,province_x,city_x,min(distances),max(distances)]
+
+                csv_writer([line],nomap,'a')
+
+```
+
+You'll find the output in the file called results.csv and noresults.csv . The execution time of this program was 9+ hours running from a 2.4 GHz 4GB Ram OsX laptop.
+
+
+
+### Conclusions
+
+Notice this program performs as many as m*n operations where m=864 and n=64272. However it finishes in about 3 minutes which is not that bad. 
+
++ Simple comparison returns 564 matches out of 864 = 65.2777% matches
++ Edit Distance comparison returns the same 564 perfect matches (Edit Distance = 0) plus:
+      Edit Distance == 1     13 Results
+      Edit Distance == 2     25 Results
+      Edit Distance == 3     178 Results
+      Edit Distance == 4     927 Results
+
++ Unfortunately results with Edit Distance = 2 are unusable for City Names. Here some examples
+
+```
+2	ARC	United States of America California Arcadia	6622	United States of America California Arcata
+2	BLM	United States of America California Belmont	26479	United States of America California Beaumont
+2	CAH	United States of America  CARMEL	22136	United States of America  Carver
+2	DRT	Canada Nova Scotia Dartmouth	6452	Canada Nova Scotia Yarmouth
+2	GV9	United States of America South Carolina Greenville	26511	United States of America North Carolina Greenville
+```
+
+Edit Distance = 1 results are ok, giving a total of 577 matches out of 864 = 66.7824% matches
+
+Was it worth an improvement of 1.5047% from a program that runs in 3 minutes vs a program that runs in 9 hours?
 
 
 
