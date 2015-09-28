@@ -142,7 +142,7 @@ if __name__ == "__main__":
 ```
 
 
-Not is is turn for Canada. No luck this time searching the web. I’ll have to create that CSV myself. Luckily Canada list is pretty short. I open https://en.wikipedia.org/wiki/Canadian_postal_abbreviations_for_provinces_and_territories and start typing the CSV myself and save it in a file called ca_states.csv and save it in the same folder as the python module
+Now it is turn for Canada. No luck this time searching the web. I’ll have to create that CSV myself. Luckily Canada list is pretty short. I open https://en.wikipedia.org/wiki/Canadian_postal_abbreviations_for_provinces_and_territories and start typing the CSV myself and save it in a file called ca_states.csv and save it in the same folder as the python module
 
 ```
 "State","Abbreviation"
@@ -159,7 +159,6 @@ Not is is turn for Canada. No luck this time searching the web. I’ll have to c
 "Quebec","QC"
 "Saskatchewan","SK"
 “Yukon","YT"
-...
 ```
 
 
@@ -696,9 +695,12 @@ You'll find the output in the file called results.csv and noresults.csv . The ex
 
 ### Conclusions
 
-Notice this program performs as many as m*n operations where m=864 and n=64272. However it finishes in about 3 minutes which is not that bad. 
+The simple matching program performs as many as m*n simple comparison operations where m=864 and n=64272. It finishes in about 3 minutes which is not that bad. 
 
 + Simple comparison returns 564 matches out of 864 = 65.2777% matches
+ 
+In the second version the program calculates the Edit Distance as many as 864x64272 times. This program takes 9+ hours to run (2.4GHz Intel Core i5, 4GB RAM OS X)
+
 + Edit Distance comparison returns the same 564 perfect matches (Edit Distance = 0) plus:
       Edit Distance == 1     13 Results
       Edit Distance == 2     25 Results
