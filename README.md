@@ -1,7 +1,7 @@
 # countrymatch
 Match two country datasets using Python CSV and Edit Distance 
 
-## Mapping two different country datasets with Python CSV
+## Matching two different country datasets with Python CSV and Edit Distance
 
 The problem:  There are two companies , lets call them X and Y. Both of them have proprietary City IDs. Of course the moment comes when they need to do business but they can’t share any information because their City IDs are not the same. Lets just create a dictionary that translates from one A to B right? Yes but not so fast. The solution is not as straightforward as it appears to be. In a real case scenario you’ll find dirty, non-normalized, legacy, incorrect, incomplete, sparse data from both parts. Good luck we have python =)
 
